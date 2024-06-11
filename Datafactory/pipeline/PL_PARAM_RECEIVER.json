@@ -66,10 +66,6 @@
 			"ParamText3": {
 				"type": "string",
 				"defaultValue": "C"
-			},
-			"ParamText4": {
-				"type": "string",
-				"defaultValue": "D"
 			}
 		},
 		"variables": {
