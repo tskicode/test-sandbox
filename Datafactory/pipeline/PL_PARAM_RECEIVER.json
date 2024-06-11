@@ -1,0 +1,92 @@
+{
+	"name": "PL_PARAM_RECEIVER",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set VariableText1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "VariableText1",
+					"value": {
+						"value": "@pipeline().parameters.ParamText1",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set VariableText2",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "VariableText2",
+					"value": {
+						"value": "@pipeline().parameters.ParamText2",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set VariableText3",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "VariableText3",
+					"value": {
+						"value": "@pipeline().parameters.ParamText3",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"ParamText1": {
+				"type": "string",
+				"defaultValue": "A"
+			},
+			"ParamText2": {
+				"type": "string",
+				"defaultValue": "B"
+			},
+			"ParamText3": {
+				"type": "string",
+				"defaultValue": "C"
+			}
+		},
+		"variables": {
+			"VariableText1": {
+				"type": "String",
+				"defaultValue": "NA"
+			},
+			"VariableText2": {
+				"type": "String",
+				"defaultValue": "NA"
+			},
+			"VariableText3": {
+				"type": "String",
+				"defaultValue": "NA"
+			}
+		},
+		"folder": {
+			"name": "PARAMETERS"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-06-11T09:08:54Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

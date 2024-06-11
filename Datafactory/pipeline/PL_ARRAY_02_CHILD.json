@@ -1,0 +1,41 @@
+{
+	"name": "PL_ARRAY_02_CHILD",
+	"properties": {
+		"activities": [
+			{
+				"name": "SV prv_calculation_result",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "prv_calculation_result",
+							"value": {
+								"type": "Expression",
+								"content": "@mul(\r\n    pipeline().parameters.p_incoming_number,\r\n    pipeline().parameters.p_incoming_number\r\n    )"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"p_incoming_number": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "VARIABLES"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-05-24T13:14:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

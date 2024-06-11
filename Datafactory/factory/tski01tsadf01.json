@@ -1,0 +1,14 @@
+{
+	"name": "tski01tsadf01",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "e8b8e213-148a-4af8-92c4-d8cacab29969",
+		"tenantId": "d6c54dc9-12e7-4050-be6c-c9789104f8be"
+	}
+}
