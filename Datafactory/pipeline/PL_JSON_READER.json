@@ -1,0 +1,224 @@
+{
+	"name": "PL_JSON_READER",
+	"properties": {
+		"activities": [
+			{
+				"name": "LK json_tski01tsconfig01",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "json_tski01tsconfig01",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SV v_json_full_data",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LK json_tski01tsconfig01",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_json_full_data",
+					"value": {
+						"value": "@string(activity('LK json_tski01tsconfig01').output)\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SV v_json_selected_data",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LK json_tski01tsconfig01",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_json_full_data",
+					"value": {
+						"value": "@string(activity('LK json_tski01tsconfig01').output\n    .value[0]['EmailRecipients'])\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FL tski01tsemailsadf",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LK json_tski01tsconfig01",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LK json_tski01tsconfig01').output.value[0]['EmailRecipients']",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(\r\n    pipeline().parameters.p_AzureService,\r\n    item().AzureService\r\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SV v_email_list",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "FL tski01tsemailsadf",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_email_list",
+					"value": {
+						"value": "@activity('FL tski01tsemailsadf').output.value[0]['EmailList']",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SV v_email_list_array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SV v_email_list",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_email_list_array",
+					"value": {
+						"value": "@split(variables('v_email_list'), ',')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FE v_email_list_array",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SV v_email_list_array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('v_email_list_array')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SV v_result",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "v_result",
+								"value": {
+									"value": "@item()",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_AzureService": {
+				"type": "string",
+				"defaultValue": "tski01tsemailsadf"
+			}
+		},
+		"variables": {
+			"v_json_full_data": {
+				"type": "String"
+			},
+			"v_json_selected_data": {
+				"type": "String"
+			},
+			"v_email_list": {
+				"type": "String"
+			},
+			"v_email_list_array": {
+				"type": "Array"
+			},
+			"v_result": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "JSON"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-05-24T13:57:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

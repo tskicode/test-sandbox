@@ -1,0 +1,41 @@
+{
+	"name": "PL_PARAM_SENDER",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute PL_PARAM_RECIVER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PARAM_RECEIVER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"ParamText1": {
+							"value": "@pipeline().parameters.ParamText1",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"ParamText1": {
+				"type": "string",
+				"defaultValue": "NEW_A"
+			}
+		},
+		"folder": {
+			"name": "PARAMETERS"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-06-11T09:08:54Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

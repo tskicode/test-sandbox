@@ -1,0 +1,77 @@
+{
+	"name": "PL_OBJECT_02_CHILD",
+	"properties": {
+		"activities": [
+			{
+				"name": "SV prv_calculation_result",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SV v_calculation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "prv_calculation_result",
+							"value": {
+								"type": "Expression",
+								"content": "@json(string(variables('v_calculation')))\n\n"
+							}
+						},
+						{
+							"key": "prv_incoming_number",
+							"value": {
+								"type": "Expression",
+								"content": "@json(string(pipeline().parameters.p_incoming_number))"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "SV v_calculation",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_calculation",
+					"value": {
+						"value": "@mul(\n    pipeline().parameters.p_incoming_number,\n    pipeline().parameters.p_incoming_number\n    )",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_incoming_number": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"v_calculation": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "VARIABLES"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-05-24T13:14:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,211 @@
+{
+	"name": "PL_OBJECT_01_PARENT",
+	"properties": {
+		"activities": [
+			{
+				"name": "FE v_items",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.p_items",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "SV v_loop_number",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "EP PL_OBJECT_02_CHILD",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "v_loop_number",
+								"value": {
+									"value": "@activity('EP PL_OBJECT_02_CHILD').output.pipelineReturnValue.prv_calculation_result",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AV v_appended_array",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "EP PL_OBJECT_02_CHILD",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "v_appended_array",
+								"value": {
+									"value": "@activity('EP PL_OBJECT_02_CHILD').output.pipelineReturnValue",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "EP PL_OBJECT_02_CHILD",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_OBJECT_02_CHILD",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_incoming_number": {
+										"value": "@item()",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SV v_outside_loop",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "FE v_items",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_outside_loop",
+					"value": {
+						"value": "@variables('v_loop_number')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SV v_final_array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SV v_outside_loop",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_final_array",
+					"value": {
+						"value": "@variables('v_appended_array')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FE v_final_array",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SV v_final_array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('v_final_array')",
+						"type": "Expression"
+					},
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "IF prv_incoming_number",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(item().prv_incoming_number, 1)\n\n",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "WT prv_incoming_number is 1",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_items": {
+				"type": "array",
+				"defaultValue": [
+					1,
+					2
+				]
+			}
+		},
+		"variables": {
+			"v_loop_number": {
+				"type": "Integer"
+			},
+			"v_outside_loop": {
+				"type": "Integer"
+			},
+			"v_appended_array": {
+				"type": "Array"
+			},
+			"v_final_array": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "VARIABLES"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-05-24T13:14:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
