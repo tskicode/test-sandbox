@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get Metadata1",
+				"name": "Get List of Files domain level",
 				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
@@ -20,6 +20,40 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"PA_FOLDER": "/01_import/example_subfolders/domain_01",
+							"PA_FILENAME": "domain*"
+						}
+					},
+					"fieldList": [
+						"childItems",
+						"itemName"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Get List of Files domain-country level",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "bin_tski01tsdata01",
+						"type": "DatasetReference",
+						"parameters": {
+							"PA_FOLDER": "/01_import/example_subfolders/domain_01/country_02",
 							"PA_FILENAME": "domain*"
 						}
 					},
