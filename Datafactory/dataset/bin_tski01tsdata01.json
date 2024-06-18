@@ -1,0 +1,33 @@
+{
+	"name": "bin_tski01tsdata01",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_tski01tsdls01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"PA_FOLDER": {
+				"type": "string"
+			},
+			"PA_FILENAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().PA_FILENAME",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().PA_FOLDER",
+					"type": "Expression"
+				},
+				"fileSystem": "tski01tsdata01"
+			}
+		}
+	}
+}
