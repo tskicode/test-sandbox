@@ -1,0 +1,1276 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "tski01tsadf01"
+		},
+		"kv_tski01tskv01_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://tski01tskv01.vault.azure.net/"
+		},
+		"ls_tski01tsdls01_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://tski01tsdls01.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ARRAY_01_PARENT')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "FE v_items",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.p_items",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 5,
+							"activities": [
+								{
+									"name": "SV v_loop_number",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "EP PL_ARRAY_02_CHILD",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_loop_number",
+										"value": {
+											"value": "@activity('EP PL_ARRAY_02_CHILD').output.pipelineReturnValue.prv_calculation_result",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "AV v_appended_array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "EP PL_ARRAY_02_CHILD",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_appended_array",
+										"value": {
+											"value": "@activity('EP PL_ARRAY_02_CHILD').output.pipelineReturnValue.prv_calculation_result",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "EP PL_ARRAY_02_CHILD",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ARRAY_02_CHILD",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"p_incoming_number": {
+												"value": "@item()",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "SV v_outside_loop",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "FE v_items",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_outside_loop",
+							"value": {
+								"value": "@variables('v_loop_number')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SV v_final_array",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SV v_outside_loop",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_final_array",
+							"value": {
+								"value": "@variables('v_appended_array')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_items": {
+						"type": "array",
+						"defaultValue": [
+							1,
+							2,
+							3,
+							4,
+							5,
+							6,
+							7,
+							8,
+							9,
+							10,
+							11,
+							12,
+							13,
+							14,
+							15,
+							16,
+							17,
+							18,
+							19,
+							20
+						]
+					}
+				},
+				"variables": {
+					"v_loop_number": {
+						"type": "Integer"
+					},
+					"v_outside_loop": {
+						"type": "Integer"
+					},
+					"v_appended_array": {
+						"type": "Array"
+					},
+					"v_final_array": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "VARIABLES"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-24T13:14:17Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_ARRAY_02_CHILD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ARRAY_02_CHILD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SV prv_calculation_result",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipelineReturnValue",
+							"value": [
+								{
+									"key": "prv_calculation_result",
+									"value": {
+										"type": "Expression",
+										"content": "@mul(\r\n    pipeline().parameters.p_incoming_number,\r\n    pipeline().parameters.p_incoming_number\r\n    )"
+									}
+								}
+							],
+							"setSystemVariable": true
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_incoming_number": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "VARIABLES"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-24T13:14:17Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_FILE_JSON_READER')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LK json_tski01tsconfig01",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "json_tski01tsconfig01",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "SV v_json_full_data",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LK json_tski01tsconfig01",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_json_full_data",
+							"value": {
+								"value": "@string(activity('LK json_tski01tsconfig01').output)\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SV v_json_selected_data",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LK json_tski01tsconfig01",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_json_full_data",
+							"value": {
+								"value": "@string(activity('LK json_tski01tsconfig01').output\n    .value[0]['EmailRecipients'])\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "FL tski01tsemailsadf",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "LK json_tski01tsconfig01",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LK json_tski01tsconfig01').output.value[0]['EmailRecipients']",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(\r\n    pipeline().parameters.p_AzureService,\r\n    item().AzureService\r\n)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SV v_email_list",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "FL tski01tsemailsadf",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_email_list",
+							"value": {
+								"value": "@activity('FL tski01tsemailsadf').output.value[0]['EmailList']",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SV v_email_list_array",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SV v_email_list",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_email_list_array",
+							"value": {
+								"value": "@split(variables('v_email_list'), ',')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "FE v_email_list_array",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "SV v_email_list_array",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('v_email_list_array')",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "SV v_result",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_result",
+										"value": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_AzureService": {
+						"type": "string",
+						"defaultValue": "tski01tsemailsadf"
+					}
+				},
+				"variables": {
+					"v_json_full_data": {
+						"type": "String"
+					},
+					"v_json_selected_data": {
+						"type": "String"
+					},
+					"v_email_list": {
+						"type": "String"
+					},
+					"v_email_list_array": {
+						"type": "Array"
+					},
+					"v_result": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "FILES"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-24T13:57:06Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/json_tski01tsconfig01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_OBJECT_01_PARENT')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "FE v_items",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.p_items",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 5,
+							"activities": [
+								{
+									"name": "SV v_loop_number",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "EP PL_OBJECT_02_CHILD",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_loop_number",
+										"value": {
+											"value": "@activity('EP PL_OBJECT_02_CHILD').output.pipelineReturnValue.prv_calculation_result",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "AV v_appended_array",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "EP PL_OBJECT_02_CHILD",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_appended_array",
+										"value": {
+											"value": "@activity('EP PL_OBJECT_02_CHILD').output.pipelineReturnValue",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "EP PL_OBJECT_02_CHILD",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_OBJECT_02_CHILD",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"p_incoming_number": {
+												"value": "@item()",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "SV v_outside_loop",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "FE v_items",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_outside_loop",
+							"value": {
+								"value": "@variables('v_loop_number')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SV v_final_array",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SV v_outside_loop",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_final_array",
+							"value": {
+								"value": "@variables('v_appended_array')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "FE v_final_array",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "SV v_final_array",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('v_final_array')",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "IF prv_incoming_number",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().prv_incoming_number, 1)\n\n",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "WT prv_incoming_number is 1",
+												"type": "Wait",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"waitTimeInSeconds": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_items": {
+						"type": "array",
+						"defaultValue": [
+							1,
+							2
+						]
+					}
+				},
+				"variables": {
+					"v_loop_number": {
+						"type": "Integer"
+					},
+					"v_outside_loop": {
+						"type": "Integer"
+					},
+					"v_appended_array": {
+						"type": "Array"
+					},
+					"v_final_array": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "VARIABLES"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-24T13:14:17Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_OBJECT_02_CHILD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_OBJECT_02_CHILD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SV prv_calculation_result",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SV v_calculation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipelineReturnValue",
+							"value": [
+								{
+									"key": "prv_calculation_result",
+									"value": {
+										"type": "Expression",
+										"content": "@json(string(variables('v_calculation')))\n\n"
+									}
+								},
+								{
+									"key": "prv_incoming_number",
+									"value": {
+										"type": "Expression",
+										"content": "@json(string(pipeline().parameters.p_incoming_number))"
+									}
+								}
+							],
+							"setSystemVariable": true
+						}
+					},
+					{
+						"name": "SV v_calculation",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_calculation",
+							"value": {
+								"value": "@mul(\n    pipeline().parameters.p_incoming_number,\n    pipeline().parameters.p_incoming_number\n    )",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_incoming_number": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"v_calculation": {
+						"type": "Integer"
+					}
+				},
+				"folder": {
+					"name": "VARIABLES"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-24T13:14:17Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_PARAM_RECEIVER')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set VariableText1",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "VariableText1",
+							"value": {
+								"value": "@pipeline().parameters.ParamText1",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set VariableText2",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "VariableText2",
+							"value": {
+								"value": "@pipeline().parameters.ParamText2",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set VariableText3",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "VariableText3",
+							"value": {
+								"value": "@pipeline().parameters.ParamText3",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ParamText1": {
+						"type": "string",
+						"defaultValue": "A"
+					},
+					"ParamText2": {
+						"type": "string",
+						"defaultValue": "B"
+					},
+					"ParamText3": {
+						"type": "string",
+						"defaultValue": "C"
+					}
+				},
+				"variables": {
+					"VariableText1": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"VariableText2": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"VariableText3": {
+						"type": "String",
+						"defaultValue": "NA"
+					}
+				},
+				"folder": {
+					"name": "PARAMETERS"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-06-11T09:08:54Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_PARAM_SENDER')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute PL_PARAM_RECIVER",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_PARAM_RECEIVER",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"ParamText1": {
+									"value": "@pipeline().parameters.ParamText1",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ParamText1": {
+						"type": "string",
+						"defaultValue": "NEW_A"
+					}
+				},
+				"folder": {
+					"name": "PARAMETERS"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-06-11T09:08:54Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_PARAM_RECEIVER')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SET_AND_APPEND_VARIABLES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "FE v_items",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.p_items",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 5,
+							"activities": [
+								{
+									"name": "SV v_loop_number",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_loop_number",
+										"value": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "AV v_appended_array",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_appended_array",
+										"value": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "SV v_outside_loop",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "FE v_items",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_outside_loop",
+							"value": {
+								"value": "@variables('v_loop_number')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SV v_final_array",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SV v_outside_loop",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "v_final_array",
+							"value": {
+								"value": "@variables('v_appended_array')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_items": {
+						"type": "array",
+						"defaultValue": [
+							1,
+							2,
+							3,
+							4,
+							5,
+							6,
+							7,
+							8,
+							9,
+							10,
+							11,
+							12,
+							13,
+							14,
+							15,
+							16,
+							17,
+							18,
+							19,
+							20
+						]
+					}
+				},
+				"variables": {
+					"v_loop_number": {
+						"type": "Integer"
+					},
+					"v_outside_loop": {
+						"type": "Integer"
+					},
+					"v_appended_array": {
+						"type": "Array"
+					},
+					"v_final_array": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "VARIABLES"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-24T13:14:17Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/json_tski01tsconfig01')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_tski01tsdls01",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "tski01tsconfig01.json",
+						"fileSystem": "tski01tsconfig01"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_tski01tsdls01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/kv_tski01tskv01')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('kv_tski01tskv01_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_tski01tsdls01')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_tski01tsdls01_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "kv_tski01tskv01",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "kv-sec-tski01tsdls01-access-key-1"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/kv_tski01tskv01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/bin_tski01tsdata01')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_tski01tsdls01",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"PA_FOLDER": {
+						"type": "string"
+					},
+					"PA_FILENAME": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().PA_FILENAME",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().PA_FOLDER",
+							"type": "Expression"
+						},
+						"fileSystem": "tski01tsdata01"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_tski01tsdls01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_FILE_BIN_READER')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get List of Files domain level",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "bin_tski01tsdata01",
+								"type": "DatasetReference",
+								"parameters": {
+									"PA_FOLDER": "/01_import/example_subfolders/domain_01",
+									"PA_FILENAME": "domain*"
+								}
+							},
+							"fieldList": [
+								"childItems",
+								"itemName"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Get List of Files domain-country level",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "bin_tski01tsdata01",
+								"type": "DatasetReference",
+								"parameters": {
+									"PA_FOLDER": "/01_import/example_subfolders/domain_01/country_02",
+									"PA_FILENAME": "domain*"
+								}
+							},
+							"fieldList": [
+								"childItems",
+								"itemName"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "FILES"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/bin_tski01tsdata01')]"
+			]
+		}
+	]
+}
