@@ -1,5 +1,5 @@
 {
-	"name": "PL_JSON_READER",
+	"name": "PL_FILE_JSON_READER",
 	"properties": {
 		"activities": [
 			{
